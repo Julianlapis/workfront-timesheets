@@ -13,8 +13,11 @@
 
 const page = await browser.getPage("workfront");
 
-// ─── CONFIG (the only org/user-specific surface) ──────────────────────────────
-const WF_DOMAIN = "youragency.my.workfront";       // your WF subdomain (config.yaml → workfront.domain)
+// ─── CONFIG (set per run) ─────────────────────────────────────────────────────
+// NOTE: dev-browser runs in a QuickJS sandbox with NO filesystem access, so this script
+// cannot read config.yaml. Mirror the relevant config.yaml values here each run. The agent
+// (which CAN read config.yaml) fills WF_DOMAIN/YEAR/PLAN before running this.
+const WF_DOMAIN = "youragency.my.workfront";       // = config.yaml workfront.domain
 const YEAR = "2026";                                // timesheet year (cells are matched by YYYY-MM-DD)
 const OVERWRITE = false;                            // true = overwrite non-empty cells that differ from plan
 const VERIFY = true;                                // false = fill only (run a second pass with VERIFY-only for big weeks > ~4 rows, to respect the ~30s QuickJS ceiling)

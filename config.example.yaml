@@ -7,14 +7,14 @@ workfront:
   domain: "youragency.my.workfront"
   # The Adobe Experience shell URL prefix your timesheets open under.
   instance_url: "https://experience.adobe.com/#/@youragency/so:youragency-Production/workfront/"
-  # The Slack channel where timesheet help/announcements land (for Phase 0 recon). Optional.
-  help_channel: "#workfront-help"
+  # The Slack channel where timesheet help/announcements land (for Phase 0 recon).
+  help_channel: "#workfront-help"  # Optional — used in Phase 0 Slack recon only; leave blank to skip.
 
 identity:
   # Your work email — used to read your own calendar RSVP and to recognize your rows.
   work_email: "you@youragency.com"
   # Your role label as it appears on timesheet rows (helps disambiguate duplicate rows). Optional.
-  role_label: "Strategy Director"
+  role_label: "Your Role Title"
 
 evidence:
   # Base dir for Claude session transcripts (for the activity histogram).
@@ -23,11 +23,15 @@ evidence:
   # Backfill window start (ISO date). Sessions/events before this are ignored.
   start_date: "2026-01-01"
   # Calendar event titles to filter OUT (personal/noise). Regex, pipe-delimited.
-  # WARNING: this can drop a real "(no title)" work event — spot-check dropped events.
+  # NOTE: this is an AGENT HINT, not script-enforced — the agent applies it while reading
+  # condense_cal.py output; no script compiles this regex. WARNING: it can drop a real
+  # "(no title)" work event — compare raw vs. filtered event counts and spot-check drops.
   calendar_filter: "Personal|Lunch|(no title)"
   # name=dir1,dir2 mapping of project → Claude project-dir slug(s) under claude_projects_dir.
+  # (Read by the agent, which passes these to claude_activity.py as --project flags.)
   project_dirs:
-    # example-client: "-Users-you-Projects-example-client,-Users-you-Projects-example-client-pitch"
+    # client-a: "-Users-you-Projects-client-a,-Users-you-Projects-client-a-pitch"
+    # client-b: "-Users-you-Projects-client-b"
 
 allocation:
   # Hour targets that govern proposed splits.
@@ -40,6 +44,7 @@ allocation:
   leadership_fallback_row: "Company / Department Meetings"
 
 policy:
+  # These flags are read by the AGENT (enforced via SKILL.md hard rules), not by scripts.
   # NEVER fold one project's hours onto a different real project's line. Park instead.
   # Only a designated general new-business code may hold multiple annotated pitches.
   never_fold_project_into_project: true
@@ -47,5 +52,5 @@ policy:
   submit_only_after_review: true
   # Project → Workfront code/row mapping. Walled/absent codes get PARKED, never folded.
   # codes:
-  #   ubs: "CDTHUS-XXXX - UBS Growth Code"
-  #   pitch_x: "Client X Pitch"
+  #   client-a: "ACME-0000 - Client A Growth Code"
+  #   pitch-x:  "Client X Pitch"

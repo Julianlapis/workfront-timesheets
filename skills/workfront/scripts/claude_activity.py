@@ -47,8 +47,12 @@ def week_of(d):
 
 for name, dirs in PROJECTS.items():
     slots = set()  # (date, hour)
+    real_base = os.path.realpath(BASE)
     for dpat in dirs:
-        for f in glob.glob(f"{BASE}/{dpat}/*.jsonl"):
+        full = os.path.realpath(os.path.join(BASE, dpat))
+        if not (full == real_base or full.startswith(real_base + os.sep)):
+            print(f"SKIP: '{dpat}' escapes base dir", file=sys.stderr); continue
+        for f in glob.glob(f"{full}/*.jsonl"):
             try:
                 with open(f, errors="ignore") as fh:
                     for line in fh:
@@ -69,7 +73,7 @@ for name, dirs in PROJECTS.items():
         if h >= 19 or h < 2: wk[w]["evening"] += 1
         if dt.weekday() >= 5: wk[w]["weekend_days"].add(str(d))
     print(f"\n=== {name} ===")
-    for w in sorted(wk, key=lambda x: datetime.strptime(x + " 2026", "%b %d %Y")):
+    for w in sorted(wk, key=lambda x: datetime.strptime(f"{x} {START.year}", "%b %d %Y")):
         v = wk[w]
         wknd = ",".join(sorted(v["weekend_days"])) or "-"
         print(f"wk {w}: active-hour-slots={v['hours']:3d}  evening-slots={v['evening']:3d}  days={len(v['days'])}  weekend={wknd}")

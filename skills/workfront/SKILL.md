@@ -42,7 +42,7 @@ Read `config.yaml` at the plugin root (copy from `config.example.yaml` on first 
 - Chrome must run with `--remote-debugging-port=9222`. If not, the user quits Chrome (⚠️ STOP and confirm Chrome is safe to quit — quitting destroys unsaved tabs/form state), then `open -a "Google Chrome" --args --remote-debugging-port=9222 --restore-last-session`.
 - Enumerate Open timesheets from the WF iframe (`config.workfront.domain` + `/timesheet/`).
 - Add missing projects: `Add item` → `Add Projects` → dialog `button[aria-label*='Quick filter']` → `input[aria-label='Quick filter page by search']` → select → `Add`. Re-check the actual row label after adding.
-- **Fill with REAL keystrokes** (`fill-week.mjs`): `elementHandle.fill()` + `Tab`. Synthetic value-injection updates the visual total but does NOT persist.
+- **Fill with REAL keystrokes** (`fill-week.mjs`): `elementHandle.fill()` + `Tab`. Synthetic value-injection updates the visual total but does NOT persist. (`fill-week.mjs` cannot read `config.yaml` — QuickJS has no `fs` — so set `WF_DOMAIN`/`YEAR` in its CONFIG block and generate `PLAN` each run.)
 - **Verify by reload + read-back + header reconcile.** The live total lies; only a reloaded value is saved. `fill-week.mjs` does this in-code (`VERIFY_OK`/`VERIFY_FAIL` + `ALL_PERSISTED`). Never report a week done unless `ALL_PERSISTED=true`; a `VERIFY_FAIL` is NEEDS-HUMAN. (Caveat: `reload()` reloads the outer shell — confirm a known-good week reads back before trusting VERIFY.)
 - **Idempotent re-runs:** the filler reads each cell before writing (`ALREADY`/`SKIP_NONEMPTY`/`DISABLED`). Safe to re-run a partial week. Set `OVERWRITE=true` only to deliberately replace.
 - Do NOT submit. Leave saved.
