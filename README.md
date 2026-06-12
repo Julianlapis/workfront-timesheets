@@ -2,7 +2,7 @@
 
 A Claude Code plugin that fills your Adobe Workfront timesheets semi-autonomously — so you do almost nothing and don't get the errors that plague manual entry.
 
-It gathers time evidence from your **calendar, Slack, and Claude session history**, proposes plausible weekly hour splits, fills the Workfront grid via the [`dev-browser`](https://www.npmjs.com/package/dev-browser) CLI with real-keystroke persistence, **verifies every cell actually saved** (Workfront silently drops entries in several ways), logs anything it can't resolve, and **submits only after you review a proof pack.**
+It gathers time evidence from your **calendar, Slack, and Claude session history**, proposes plausible weekly hour splits, fills the Workfront grid via the [`dev-browser`](https://www.npmjs.com/package/dev-browser) CLI with real-keystroke persistence, **verifies every cell actually saved** (Workfront silently drops entries in several ways), and **submits only after you review a proof pack.** When Workfront blocks you — a row that should be loggable is disabled, a project is missing, a submit bounces — it **drafts and files a support ticket for you** so the blocker becomes a tracked request instead of a dead end.
 
 ## Why it exists
 
