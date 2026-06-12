@@ -80,6 +80,12 @@ Run these checks BEFORE Phase 0. If any fails, STOP and tell the user exactly wh
   - `slack` → post the filled template to `config.ticketing.slack_channel` via the Slack MCP.
   - `email` → draft to `config.ticketing.email` (send only on confirm).
 - **Human gate:** draft every ticket, show the user, file on confirm — unless `config.ticketing.auto_file: true`. Never invent a `requested action`; if unsure what fix is needed, ask. After filing, record the ticket ref next to the parked hours so the week can be completed once it's resolved.
+- **WF Request form gotchas (hard-won 2026-06-12):**
+  - **Single draft per queue.** A WF Request queue resumes ONE draft — opening a new request reuses/overwrites it. You can't stage two drafts at once. File (submit) one ticket fully before starting the next.
+  - **Fields key off the `name` attribute, not `aria-label`** (e.g. Subject's input has `name="name"`; custom fields like `name="DE:..."`). Match by `name`.
+  - **Product/Area are custom multiselects** (`li[role=menuitemcheckbox]`), not native selects. A `document.querySelectorAll("input[type=checkbox]")` sweep misses them. Open the dropdown, then click the inner `input[id="input-listoption-N"]` BY ID (real Playwright click) — `aria-checked` flips to `true` and the field shows "N of M selected".
+  - **Opening matters:** navigating to the full new-request URL (with `projectID`/`path`) prefills Request Type + agency and reveals the detail fields; clicking "New request" cold starts blank — select Request Type and your agency first, or the detail fields don't render.
+  - **Don't double-toggle dropdowns** — clicking the field again closes an already-open one. Check open-state before clicking.
 
 ## Gotchas (hard-won — these are the reason this skill exists)
 - **Rows can be DISABLED** (`input.disabled`) even when the project is on the sheet — you're on the project but not a loggable *task*. Check disabled state before filling; route to blocker log, don't force.
