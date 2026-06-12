@@ -19,7 +19,7 @@ Run these checks BEFORE Phase 0. If any fails, STOP and tell the user exactly wh
    ```bash
    curl -s http://localhost:9222/json/version >/dev/null && echo OK || echo "Chrome not on debug port — see Phase 3 launch step"
    ```
-3. **config.yaml present** — read it (copy from `config.example.yaml` on first run). Every org/user-specific value — WF domain, instance URL, work email, project→code map, hour targets, leadership default, hard floor — lives there. Nothing in this skill is hardcoded. If missing, STOP and tell the user to create it from the example.
+3. **config.yaml present** — read it (copy from `config.example.yaml` on first run). Every org/user-specific value — WF domain, instance URL, work email, project→code map, hour targets, leadership default — lives there. Nothing in this skill is hardcoded. If missing, STOP and tell the user to create it from the example.
 4. **MCPs available** (read-only evidence sources): Slack and Google Calendar. If absent, the agent can still fill from a user-provided allocation, but flag that the evidence layer is degraded.
 
 ## The four jobs
@@ -32,7 +32,7 @@ Run these checks BEFORE Phase 0. If any fails, STOP and tell the user exactly wh
 - **Submit only after proof review** (`policy.submit_only_after_review`). Fill + save all sheets, show the proof pack, THEN submit. Never auto-submit.
 - **NEVER fold one project's hours onto a different real project's line** (`policy.never_fold_project_into_project`). Hours with no loggable code get PARKED (left unlogged), not logged somewhere wrong. Only a designated general new-business code may hold multiple *annotated* pitches.
 - **Allocations = plausible & clean.** Calendar-anchored, rounded splits. Not forensic. This is a policy, not a self-check — the agent cannot certify its own splits; the proof-pack review is the plausibility gate.
-- **Hours targets** come from config (`allocation.*`): low/high band, pitch-week minimum, hard floor, leadership hours/week. The calendar systematically UNDERSTATES pitch work.
+- **Hours targets** come from config (`allocation.*`): low/high band, pitch-week minimum, leadership hours/week. The calendar systematically UNDERSTATES pitch work.
 - **Cross-tab Claude session history** — evening (≥19:00) + weekend sessions on a project corroborate real hours; log weekend time when sessions prove it.
 - **Low-confidence weeks → ask one by one** before filling. Never silently guess.
 
@@ -61,6 +61,26 @@ Run these checks BEFORE Phase 0. If any fails, STOP and tell the user exactly wh
 
 **Phase 4 — Proof + questions.** Assemble the proof pack (4 items above) per week. Present it + the blocker log. After approval, submit each sheet (`Submit for approval`), handling finance bounces by logging to the questions queue, not retry-spiraling.
 
+**Phase 5 — File blocker tickets (if `ticketing.enabled`).** Workfront is wonky; some blockers are WF's problem, not yours, and should become tracked tickets instead of just parked. After Phase 4, collect every blocker and offer to file tickets for the ones that need an ops/admin fix.
+- **File a ticket when:** a row that SHOULD be loggable is `DISABLED` (you're on the project but not a loggable task), a project that should be on your sheet is missing/unassignable, or a `Submit for approval` throws a finance/job-code bounce. Do NOT ticket your own choices (parked-by-decision, intentional gaps).
+- **Ticket template** (subject + body):
+  ```
+  Subject: [Timesheet] {issue} — {project} — week of {week}
+  - Requester: {config.identity.work_email}
+  - Week: {week range}
+  - Project / code: {project}
+  - Issue: {DISABLED row | missing/unassignable project | submit bounce}
+  - Expected: {what should be loggable}
+  - Actual: {verbatim error text, or "row present but input disabled"}
+  - Hours blocked: {N}h parked pending fix
+  - Requested action: {assign me to a loggable task on {project} | add the project to my timesheet | fix the Maconomy/job code so this week submits}
+  ```
+- **Destination** = `config.ticketing.destination`:
+  - `workfront_request` → drive `file-ticket.mjs` against `config.ticketing.workfront_request_url` (native WF Request — the same queue ops points you to).
+  - `slack` → post the filled template to `config.ticketing.slack_channel` via the Slack MCP.
+  - `email` → draft to `config.ticketing.email` (send only on confirm).
+- **Human gate:** draft every ticket, show the user, file on confirm — unless `config.ticketing.auto_file: true`. Never invent a `requested action`; if unsure what fix is needed, ask. After filing, record the ticket ref next to the parked hours so the week can be completed once it's resolved.
+
 ## Gotchas (hard-won — these are the reason this skill exists)
 - **Rows can be DISABLED** (`input.disabled`) even when the project is on the sheet — you're on the project but not a loggable *task*. Check disabled state before filling; route to blocker log, don't force.
 - **Grid virtualizes** rows; off-screen inputs don't exist in the DOM until scrolled into view.
@@ -81,3 +101,4 @@ Many agencies file each pitch as "{Client} Pitch" but the project often lacks a 
 - `fill-week.mjs` — real-keystroke filler with in-code idempotency + reload-verify. Edit the CONFIG block + PLAN.
 - `scripts/condense_cal.py --email you@org.com <events.json>` — calendar JSON → compact per-event lines.
 - `scripts/claude_activity.py --start … --base … --project name=dir1,dir2` — per-week Claude-session histogram.
+- `file-ticket.mjs` — files a blocker as a Workfront Request (fills Subject+Description, stops before submit unless `SUBMIT=true`).
