@@ -1,0 +1,8 @@
+{
+  "name": "workfront-timesheets",
+  "version": "0.1.0",
+  "description": "Semi-autonomous Adobe Workfront timesheet filler. Gathers time evidence from Slack, Calendar, and Claude session history; proposes allocations; fills the grid via dev-browser with real-keystroke persistence and reload-verify; submits only after human review.",
+  "author": "Julian Alexander",
+  "license": "MIT",
+  "keywords": ["workfront", "timesheets", "dev-browser", "automation", "time-tracking"]
+}
