@@ -7,8 +7,20 @@ description: Fill and submit your Adobe Workfront timesheets semi-autonomously. 
 
 Semi-autonomous timesheet filler. Workfront is buggy and the entry model is finicky — this skill exists to make you do almost nothing while avoiding the errors that plague it.
 
-## STEP 0 — Load config (required)
-Read `config.yaml` at the plugin root (copy from `config.example.yaml` on first run). Every org/user-specific value — WF domain, instance URL, work email, project→code map, hour targets, the leadership default, the hard floor — lives there. Nothing in this skill is hardcoded to one user. If `config.yaml` is missing, STOP and tell the user to create it from the example.
+## STEP 0 — Preflight (required, in order)
+Run these checks BEFORE Phase 0. If any fails, STOP and tell the user exactly what to fix — do not proceed and fail cryptically mid-fill.
+
+1. **dev-browser installed** (the fill mechanism depends entirely on it; it is NOT bundled):
+   ```bash
+   command -v dev-browser >/dev/null && echo OK || echo "MISSING: run  npm install -g dev-browser && dev-browser install"
+   ```
+   If MISSING, stop and give the user that install command. Nothing in Phase 3 works without it.
+2. **Chrome reachable on the debug port** (Phase 3 attaches to a logged-in Workfront session):
+   ```bash
+   curl -s http://localhost:9222/json/version >/dev/null && echo OK || echo "Chrome not on debug port — see Phase 3 launch step"
+   ```
+3. **config.yaml present** — read it (copy from `config.example.yaml` on first run). Every org/user-specific value — WF domain, instance URL, work email, project→code map, hour targets, leadership default, hard floor — lives there. Nothing in this skill is hardcoded. If missing, STOP and tell the user to create it from the example.
+4. **MCPs available** (read-only evidence sources): Slack and Google Calendar. If absent, the agent can still fill from a user-provided allocation, but flag that the evidence layer is degraded.
 
 ## The four jobs
 1. The user does almost nothing — reviews a proposal once and answers a short questions log.

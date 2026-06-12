@@ -16,10 +16,20 @@ Workfront's timesheet grid has a set of non-obvious failure modes that cost hour
 
 This plugin encodes all of those as hard-won gotchas and defends against them mechanically (reload-verify, idempotency guards, disabled-row detection).
 
+## Prerequisites
+
+This plugin **drives a real browser** — it does not ship one. You need:
+
+- **[`dev-browser`](https://www.npmjs.com/package/dev-browser)** — the CLI that runs the fill. **Required, not bundled** (a plugin shouldn't vendor a third-party CLI). Install: `npm install -g dev-browser && dev-browser install`
+- **Google Chrome**, launched with remote debugging and logged into Workfront: `open -a "Google Chrome" --args --remote-debugging-port=9222 --restore-last-session` (the skill walks you through this in Phase 3).
+- **Claude Code MCPs** for **Slack** and **Google Calendar** (the read-only evidence layer). Without them you can still fill from a manual allocation; the evidence layer is just degraded.
+
+The skill runs a STEP 0 preflight that checks for all of these and stops with a clear message if anything's missing — so you won't fail cryptically mid-fill.
+
 ## Install
 
-1. Install the plugin (via your Claude Code plugin marketplace, or point Claude Code at this repo).
-2. Install dev-browser: `npm install -g dev-browser && dev-browser install`
+1. Install the prerequisites above.
+2. Install the plugin (via your Claude Code plugin marketplace, or point Claude Code at this repo).
 3. Copy `config.example.yaml` → `config.yaml` and fill it in. **This is the only file you edit.**
 4. Run `/workfront` and say what you want ("fill last month", "do this week").
 
